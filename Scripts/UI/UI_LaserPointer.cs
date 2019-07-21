@@ -15,11 +15,18 @@ namespace UI {
 		private SteamVR_Controller.Device controller { get { return SteamVR_Controller.Input((int)trackedObj.index); } }
 		private SteamVR_TrackedObject trackedObj;
 
-        private float _distanceLimit;
+                private float _distanceLimit;
 		private int sceneIndex; 
 
 		public GameObject HandMenuL;
 		public GameObject HandMenuR;
+	    
+	    private ProbeMode inParent;
+       	    private GameObject savedBone;
+
+            [HideInInspector]
+            public bool willExit = false;
+
 
         // Use this for initialization
         void Start()
@@ -63,6 +70,37 @@ namespace UI {
 
             if(bHit) {
                 distance = hitInfo.distance;
+		    if (controller.GetPressDown(SteamVR_Controller.ButtonMask.Grip))
+                {
+                    if (!willExit)
+                    {
+                        willExit = true; // active info box 
+                    }
+                    else
+                    {
+                        willExit = false; // deactivate info box
+                    }
+                }
+                if (willExit && triggerTapped) // if grip button has been pressed
+                {
+                    Debug.Log("Probe Mode should be activated."); //info box should show
+                    inParent = hitInfo.collider.gameObject.GetComponentInParent<ProbeMode>();
+                    savedBone = hitInfo.collider.gameObject;
+                    if (inParent != null && willExit) // savedBone.GetComponent<ProbeMode>() != null ||
+                    {
+                        savedBone.GetComponentInParent<ProbeMode>().OnEnter(savedBone);
+                        willExit = true;
+
+                    }
+                }
+                if (!willExit) // if grip button has been pressed again
+                {
+                    Debug.Log("Probe Mode should be deactivated."); // no info box
+                    if (inParent != null)
+                    {
+                        savedBone.GetComponentInParent<ProbeMode>().OnExit(savedBone);
+                    }
+                    willExit = false;
             }
 
             // ugly, but has to do for now
