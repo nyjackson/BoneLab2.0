@@ -20,25 +20,17 @@ public class ProbeMode : MonoBehaviour
     private Text[] boneInfo;
     public TextAsset file_path;
     private int tagCount = 0;
-    private Quaternion oldRotation;
     private Vector3 oldBoxScale;
-
-    // Highlighting Vars
     private GameObject bone;
-    private Material boneMaterial;
-    //  private Color boneColor = new Color(0.93f, 0.90f, 0.83f, 1.0f);
-    
-
-    private Color prevOutlineCol;
     private Bounds combinedBounds;
 
+    private bool timelineFin;
+    private UI_Timeline timeline;
 
     private void Start()
     {
         Debug.Log("Welcome to Probe Mode.");
         infoCanvas.enabled = false;
-        oldRotation = infoCanvas.transform.rotation;
-
     }
     public void OnEnter(GameObject chosenBone)
     {
@@ -60,8 +52,8 @@ public class ProbeMode : MonoBehaviour
     { // read info from BoneName.txt in the Resources folder.
         StreamReader inp_stm = new StreamReader("Assets/Resources/Probe Mode Info/" + file_path.name + ".txt");
 
-        if (IsTimelineBone())
-        { // hide species/age/similar specimens if timeline is not complete 
+        if (IsTimelineBone() && !timelineFin) // if its a timeline bone and if the timeline is not complete
+        { 
             string[] boneLines = System.IO.File.ReadAllLines("Assets/Resources/Probe Mode Info/" + file_path.name + ".txt");
             boneInfo[0].text += " " + boneLines[0];
             boneInfo[1].text += " ??";
@@ -128,6 +120,7 @@ public class ProbeMode : MonoBehaviour
             //infoCanvas.transform.LookAt(transform.position + camera.transform.rotation * Vector3.forward, camera.transform.rotation * Vector3.up);
             infoCanvas.transform.rotation = camera.transform.rotation;
         }
+        timelineFin = GameObject.Find("Timeline Window").GetComponent<UI_Timeline>().finTimeline;
     }
 
     Bounds GetBoneBounds()
@@ -150,7 +143,6 @@ public class ProbeMode : MonoBehaviour
     }
 
     private bool IsTimelineBone() { //add on to this and check if timeline is complete or not.
-    // if Timeline is complete, "unlock info"
         GameObject[] timeChildren = GameObject.FindGameObjectsWithTag("Timeline Bone");
         foreach (GameObject child in timeChildren) {
             if (child.transform.parent.name == bone.name) {
