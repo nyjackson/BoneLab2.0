@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,6 +23,7 @@ using UnityEngine.SceneManagement;
 // Nyala Jackson
 // njackson@vassar.edu
 // June 2019
+// Added new else statement in CreateChecklist
 
 
 
@@ -60,6 +61,7 @@ namespace UI {
 
 		float ySeparation = 50.0f; // vertical separation of checkboxes
 
+        //private int maxBones = 20;
 		// Counters
 		private int p = 0;
 		private int b = 0;
@@ -128,25 +130,27 @@ namespace UI {
 						tempCheckbox.SetParent(currentPage.transform, worldPositionStays:false);
 						Debug.Log (tempCheckbox.position);
 						tempCheckbox.GetComponentInChildren<Text> ().text = bones [(p * (bpp)) + b].name;
-						y = y - ySeparation;
+                        Debug.Log("This is the bone: " + bones[p * (bpp) + b].name);
+                        Debug.Log("This is how many bones are listed " + numBonesListed);
+                        Debug.Log("How many bones there are: " + bones.Length);
+                        y = y - ySeparation;
 						b++;
 						numBonesListed++;
+                        Debug.Log("This is the end of the if condition.");
 					}
 				} 
 
 				else {
-					while (b < (bones.Length - numBonesListed)) {
-						var tempCheckbox = Instantiate (checkBox);
-						tempCheckbox.position = new Vector3 (x, y, z);
-
-						tempCheckbox.SetParent(currentPage.transform, worldPositionStays:false);
-
-						//, currentPage.transform); //instantiate, set current page as parent
-						tempCheckbox.GetComponentInChildren<Text> ().text = bones [(p * (bpp)) + b].name;
-						y = y - ySeparation;
-						b++;
-						numBonesListed++;
-					}	
+                    while (bones.Length != numBonesListed) { // this loop keeps adding bones to the page until bonesListed anad bones length are equal.
+                        var tempCheckbox = Instantiate(checkBox);
+                        tempCheckbox.position = new Vector3(x, y, z);
+                        tempCheckbox.SetParent(currentPage.transform, worldPositionStays: false);
+                        //, currentPage.transform); //instantiate, set current page as parent
+                        tempCheckbox.GetComponentInChildren<Text>().text = bones[(p * (bpp)) + b].name;
+                        y = y - ySeparation;
+                        b++;
+                        numBonesListed++;
+                    }
 				}
 				// Add that page to memory so it can be referenced later for bone creation
 				pages [p] = currentPage;
@@ -156,7 +160,7 @@ namespace UI {
 
 
 
-		// applied to "Create Bones" button
+		// applied to "Create Bones/ Load Scene" button
 		public void CreateBonesSelected () {
 			foreach (GameObject page in pages) {
 
@@ -165,11 +169,13 @@ namespace UI {
 						bone_name = tog.GetComponentInChildren<Text> ().text;
 
 						for (int i = 0; i < bones.Length; i++) {
+                            if (i == 0) { DontDestroyOnLoad(bones[i].GetComponent<ProbeMode>().infoCanvas); }
 							if (bones [i].name == bone_name) {
 								bones [i].SetActive (true);
 								bones [i].transform.position = coordinates [n].position;
 								n++;
 								DontDestroyOnLoad (bones [i].gameObject);
+                                //DontDestroyOnLoad(bones[i].GetComponent<ProbeMode>().infoCanvas);
 							}
 						}
 
@@ -177,8 +183,7 @@ namespace UI {
 					}
 				}
 			}
-
-			SceneManager.LoadScene ("Main", LoadSceneMode.Single);
+			SceneManager.LoadScene ("Scenes/Main", LoadSceneMode.Single);
 		}
 
 		// applied to back page arrow
@@ -224,11 +229,10 @@ namespace UI {
 				}
 			}
 
-			selectedBonesText.text = bonesSelected.ToString () + " Selected (Max 20)";
+			selectedBonesText.text = bonesSelected.ToString () + " Selected (Max 45)"; // also, if we are going to keep a max, I need to set an error/check for this
 
 		}
-
-
+        
 
 }
 }
