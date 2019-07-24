@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
-// This class checks if the bones are in the right boxes, and changes
-// the timeline ui window, accordingly. 
+// This class checks if the bones are in the right boxes, if the bone in the box is correct, updates the hint box with
+// list of incorrect/missing bones, and unlocks species/age/similar specimen in timeline infoboxes. 
+// Can also return to menu when timeline is complete
 
 
 // Nyala Jackson
@@ -20,8 +22,9 @@ public class UI_Timeline : MonoBehaviour
     public GameObject tipBox;
     public GameObject hintBox;
     public Button checkTimeButton;
+    public Button goHome;
 
-    private bool m_Started; //might remove
+    //private bool m_Started; //might remove
     private bool bonesMissing = false;
     private bool checkBoneBox;
 
@@ -36,12 +39,11 @@ public class UI_Timeline : MonoBehaviour
     {
         finTimeline = false;
         hintBox.SetActive(false);
-        m_Started = true;
+        goHome.gameObject.SetActive(false);
         incorrectBones = new List<string>();
         timeKeys = new Dictionary<string, string[]>();
-        // actual
         timeKeys.Add("A.afarensis", new[] { "LH 5 Teeth" });
-        timeKeys.Add("A.boisei", new[] {"KNM-ER 13750","KNM-ER 729", "KNM-ER 1805","KNM-ER 3230", "KNM-WT 17400",
+        timeKeys.Add("A.boisei", new[] {"KNM-ER 13750","KNM-ER 729","KNM-ER 3230", "KNM-WT 17400",
            "KNM-ER 23000 Frontal", "KNM-ER 23000 Occipital", "KNM-ER 23000 Parietals",
           "KNM-ER 23000 Right Temporal", "KNM-ER 23000 Left Temporal"});
         timeKeys.Add("H.erectus", new[] { "KNM-ER 992a", "KNM-ER 820", "KNM-ER 3732", "KNM-ER 42700", "KNM-WT 15000m" });
@@ -51,7 +53,10 @@ public class UI_Timeline : MonoBehaviour
         //timeKeys.Add("TestQuad", new[] { "KNM-ER 23000 Frontal", "Cubious" });
         //timeKeys.Add("TestedQuad", new[] { "dubious" });
     }
-
+    public void GoHome()
+    {
+        SceneManager.LoadScene("Scenes/Load", LoadSceneMode.Single);
+    }
     public void OnButtonClick()
     {
         // if this is pressed and all boxes contain the correct bones, then fintimeline
@@ -60,17 +65,18 @@ public class UI_Timeline : MonoBehaviour
         for (int i = 0; i < boneBoxes.Length; i++)
         {
             chosenBox = boneBoxes[i];
-            Debug.Log("Box: " + chosenBox.name);
             MyCollisions();
         }
 
-        foreach (string str in incorrectBones)
-        {
-            Debug.Log("Incorrectly Placed: " + str);
-        } 
+        /*  foreach (string str in incorrectBones)
+          {
+          // goes through list of incorrect/missing bones
+              Debug.Log("Incorrectly Placed: " + str);
+          }  */
 
-        if(incorrectBones.Any())
+        if (incorrectBones.Any())
         {
+            // lists wrong/incorrect bones
             PromptHint();
         }
         else
@@ -79,16 +85,15 @@ public class UI_Timeline : MonoBehaviour
             // all bones are correct and in the right boxes
         }
 
+
     }
     private bool CorrectBox(string boneVal)
     {
-        //Debug.Log("You have entered CorrectBox");
         checkBoneBox = false;
         foreach (KeyValuePair<string, string[]> kvp in timeKeys)
         {
             if (chosenBox.name == kvp.Key)
             {
-               // Debug.Log("Tis the correct box");
                 if (kvp.Value.Contains(boneVal))
                 { // if the current key's array of values contains the correct bone
                     checkBoneBox = true;
@@ -100,6 +105,7 @@ public class UI_Timeline : MonoBehaviour
 
     void PromptHint()
     {
+        Debug.Log("Prompt Hint has been reached.");
         hintBox.SetActive(true);
         foreach (string wrongPlace in incorrectBones)
         {
@@ -110,10 +116,11 @@ public class UI_Timeline : MonoBehaviour
     public void FinTimeline()
     {
         Debug.Log("Timeline has been reached.");
-        instructBox.GetComponentInChildren<Text>().text = "Timeline Complete! All fossils are in the correct order. New information unlocked!";
+        instructBox.GetComponentInChildren<Text>().text = "Timeline Complete! All fossils are in the correct order. New fossil information unlocked! Press the button to return to the main menu.";
         hintBox.SetActive(false);
         tipBox.SetActive(false);
         checkTimeButton.gameObject.SetActive(false);
+        goHome.gameObject.SetActive(true);
         finTimeline = true;
     }
 
@@ -121,7 +128,7 @@ public class UI_Timeline : MonoBehaviour
     {
         bool boneCorrect = false;
         bool missingBones = false;
-        Collider[] hitColliders = Physics.OverlapBox(chosenBox.transform.position, chosenBox.transform.localScale/2, chosenBox.transform.localRotation); //, layer Mask (but not needed)
+        Collider[] hitColliders = Physics.OverlapBox(chosenBox.transform.position, chosenBox.transform.localScale / 2, chosenBox.transform.localRotation); //, layer Mask (but not needed)
         string[] bonesInBox = new string[hitColliders.Length];
         int i = 0;
         while (i < hitColliders.Length)
@@ -167,10 +174,5 @@ public class UI_Timeline : MonoBehaviour
         incorrectBones = new HashSet<string>(incorrectBones).ToList(); // gets rid of duplicates
         return bonesMissing;
         //check if the bones are in the correct box, and if all the correct bones are in the box.
-    }
-    private void OnDrawGizmos()
-    { // draws the invisible lines of the OverlapBox in editor 
-        Gizmos.color = Color.red;
-        if (m_Started && chosenBox != null) Gizmos.DrawWireCube(chosenBox.transform.position, chosenBox.transform.localScale);
     }
 }
