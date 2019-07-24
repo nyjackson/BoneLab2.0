@@ -44,8 +44,8 @@ public class ProbeMode : MonoBehaviour
     public void OnExit(GameObject chosenBone)
     {
         Debug.Log("On Collision Exit");
-        bone = chosenBone.transform.parent.gameObject;
-        GenerateInfoBox(false); // maybe disable canvas right here instead?
+        infoCanvas.enabled = false;
+        Debug.Log("No more info box.");
     }
 
     void ReadTextFile()
@@ -94,7 +94,6 @@ public class ProbeMode : MonoBehaviour
             infoCanvas.transform.localPosition = new Vector3(-GetBoneBounds().size.x * 20, GetBoneBounds().size.y, GetBoneBounds().size.z);
             infoCanvas.enabled = true;
             boneID.text = bone.name;
-            //infoCanvas.transform.rotation = oldRotation; //info box won't rotate when bone rotates
             boneInfo = boneTags.gameObject.GetComponentsInChildren<Text>();
             boneInfo[0].text = "Bone:";
             boneInfo[1].text = "Species:";
@@ -104,11 +103,6 @@ public class ProbeMode : MonoBehaviour
             ReadTextFile();
 
         }
-        else
-        {
-            Debug.Log("No more info box.");
-            infoCanvas.enabled = false;
-        }
     }
 
     public void Update()
@@ -117,7 +111,6 @@ public class ProbeMode : MonoBehaviour
         if (infoCanvas != null)
         {
             Camera camera = Camera.main;
-            //infoCanvas.transform.LookAt(transform.position + camera.transform.rotation * Vector3.forward, camera.transform.rotation * Vector3.up);
             infoCanvas.transform.rotation = camera.transform.rotation;
         }
         timelineFin = GameObject.Find("Timeline Window").GetComponent<UI_Timeline>().finTimeline;
