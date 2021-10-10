@@ -1,0 +1,25 @@
+@import url("https://fonts.googleapis.com/css2?family=EB+Garamond&family=Bitter:wght@100&display=swap");
+body {
+  text-align: center;
+}
+.header,
+footer {
+  background-color: rgb(0, 0, 0);
+  padding: 10px 16px;
+  color: white;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  font-family: "Bitter", serif;
+  font-weight: bolder;
+}
+.header .logo {
+  letter-spacing: 1px;
+  font-weight: lighter;
+  text-align: left;
+  letter-spacing: 5px;
+}
+.header li {
+  display: inline;
+  padding-right: 2.22rem;
+}
